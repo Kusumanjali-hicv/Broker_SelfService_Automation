@@ -1,0 +1,13 @@
+{
+    "middleName": "",
+    "employeeId": "jcastro",
+    "employeeEmail": "test-jcastro17@test.com",
+    "dateOfBirth": "1999-01-02",
+    "currentAddress": {
+        "line1": "1817 address street",
+        "city": "Orlando",
+        "state": "FL",
+        "zip": "32789",
+        "country": "UNITED STATES"
+    }
+}

@@ -1,0 +1,7 @@
+pip
+robotframework
+robotframework-requests
+robotframework-jsonlibrary
+robotcode-runner
+robotframework-datadriver
+robotframework-seleniumlibrary

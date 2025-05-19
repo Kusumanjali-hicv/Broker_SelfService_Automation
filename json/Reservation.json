@@ -1,0 +1,35 @@
+{
+    "campaignId": "701WD000006YmphYAC",
+    "tourWaveAllotmentId": 2390092,
+    "packageProductId": "01t3s000005q5rdAAA",
+    "contactId": "003WD00000TfA17YAF",
+    "destination": "CENTRAL FLORIDA",
+    "reservationRequest": {
+        "checkin": "2025-06-22",
+        "checkout": "2025-06-25",
+        "lengthOfStay": 3,
+        "propertyCode": "discv",
+        "propertyRoomTypeId": 43,
+        "roomTypeCode": "Standard-2Q",
+        "numberOfGuests": 4,
+        "inventories": [
+            {
+                "inventoryId": 1372147,
+                "night": "2025-01-22"
+            },
+            {
+                "inventoryId": 1372149,
+                "night": "2025-01-23"
+            },
+            {
+                 "inventoryId": 1372151,
+                "night": "2025-01-24"
+            }
+        ]
+    },
+    "primaryPreferredArrivalDate": "2025-01-22",
+    "consent": {
+        "hasReadDetailsOfParticipation": false,
+        "acknowledgesQualificationsAndDefaultCharge": false
+    }
+}
