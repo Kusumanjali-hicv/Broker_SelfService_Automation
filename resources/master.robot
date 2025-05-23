@@ -9,13 +9,13 @@ Resource    ${EXECDIR}/resources/API/GET_API_Requests.robot
 *** Keywords ***
 BrokerSelfService Test Setup
     [Documentation]    Retrieves test data from GET API methods
-    [Arguments]    ${vendor}
+    [Arguments]    ${vendor}    ${property_type}
     Run Keywords
         GET Access Token
         GET Campaign Id    ${vendor}
         GET Tour Allotments
         GET Packages
-        GET Reservation Availabilities
+        GET Reservation Availabilities    ${property_type}
 
 BrokerSelfService Suite Setup
     [Documentation]    Initializes test data and dates

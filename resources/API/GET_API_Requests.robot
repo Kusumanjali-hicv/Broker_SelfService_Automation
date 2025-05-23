@@ -71,6 +71,7 @@ GET Packages
 
 GET Reservation Availabilities
     [Documentation]    Get Reservation Availabilities
+    [Arguments]    ${property_type}
     ${headers}=    Create API Headers
     ${query_params}=    Create Dictionary
     ...    checkInFrom=${checkIn_date}
@@ -78,7 +79,7 @@ GET Reservation Availabilities
     ...    isSummary=false
     ...    lengthOfStay=${lengthOfStay}
     ...    campaignId=${campaignId}
-    ...    propertyCodes=dislb
+    #...    propertyCodes=dislb
     ...    destination=${destination}
     ...    reservationType=Marketing
     ...    reservationSubType=Mini Vac
@@ -88,45 +89,70 @@ GET Reservation Availabilities
     Should Be Equal As Strings    ${response.status_code}    200
     
     ${json}=    Set Variable    ${response.json()}
-    Parse Reservation Response    ${json}
+    Parse Reservation Response    ${json}    ${property_type}
 
 Parse Reservation Response
-    [Arguments]    ${json}
-    ${first_property}=    Set Variable    ${json}[0]
-    ${first_room_type}=    Set Variable    ${first_property}[roomTypes][0]
+    [Arguments]    ${json}    ${property_type}
+    IF    $property_type == "hotel"
+        ${isResort}=    Set Variable    False
+    ELSE IF    $property_type == "resort"
+        ${isResort}=    Set Variable    True        
+    END
     
-    Set Suite Variable    ${propertyCode}    ${first_property}[propertyCode]
-    Set Suite Variable    ${propertyRoomTypeId}    ${first_room_type}[propertyRoomTypeId]
-    Set Suite Variable    ${roomTypeCode}    ${first_room_type}[roomTypeCode]
+    ${matching_property}=    Set Variable    ${None}
+    ${matching_room_type}=    Set Variable    ${None}
     
-    ${inventories}=    Extract Inventories    ${first_room_type}[periods]
+    FOR    ${property}    IN    @{json}
+        IF    ${property}[isResort] == ${isResort}
+            ${matching_property}=    Set Variable    ${property}
+            ${matching_room_type}=    Set Variable    ${property}[roomTypes][0]
+            Exit For Loop
+        END
+    END
+    
+    Should Not Be Equal    ${matching_property}    ${None}    No property found with isResort=${isResort}
+    ${property}=    Set Variable    ${matching_property}
+    ${room_type}=    Set Variable    ${matching_room_type}
+    
+    Set Suite Variable    ${propertyCode}    ${property}[propertyCode]
+    Set Suite Variable    ${propertyRoomTypeId}    ${room_type}[propertyRoomTypeId]
+    Set Suite Variable    ${roomTypeCode}    ${room_type}[roomTypeCode]
+    
+    ${inventories}=    Extract Inventories    ${room_type}[periods]
     Set Suite Variable    ${inventories}    ${inventories}
 
 Extract Inventories
     [Arguments]    ${periods}
     ${inventories}=    Create List
-    FOR    ${period}    IN    @{periods}
-        ${has_inventories}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${period}    inventories
-        IF    ${has_inventories}
-            FOR    ${inventory}    IN    @{period}[inventories]
-                ${inv}=    Create Inventory Dictionary    ${inventory}
-                Append To List    ${inventories}    ${inv}
+    ${first_period}=    Set Variable    ${periods}[0]
+    
+    Set Suite Variable    ${checkIn_date}    ${first_period}[firstNight]
+    #add one day to checkOut_date
+    ${checkOut_date}=    Set Variable   ${first_period}[lastNight]    
+    ${checkOut_date}=    Add Time To Date    ${checkOut_date}    1 days    result_format=%Y-%m-%d
+    Set Suite Variable    ${checkOut_date}   ${checkOut_date}
+
+    ${length_of_stay}=     Subtract Date From Date    ${checkOut_date}    ${checkIn_date}     verbose
+
+    ${SF_checkIn_date}=    Convert Date    ${checkIn_date}    result_format=%m/%d/%Y
+    ${SF_checkOut_date}=    Convert Date    ${checkOut_date}    result_format=%m/%d/%Y
+    Set Suite Variable    ${SF_checkIn_date}
+    Set Suite Variable    ${SF_checkOut_date}
+    ${count}    Set Variable    0
+    IF    "inventories" in ${first_period}
+        FOR    ${inventory}    IN    @{first_period}[inventories]
+            ${inv}=    Create Dictionary    night=${inventory}[dateAvailable]
+            ${count}=    Evaluate    ${count}+1
+            IF    "inventoryId" in ${inventory}
+                Set To Dictionary    ${inv}    inventoryId=${inventory}[inventoryId]
             END
+            Append To List    ${inventories}    ${inv}
         END
     END
+    
     Should Not Be Empty    ${inventories}
+    ${length_of_stay}=    Set Variable    ${count}
     RETURN    ${inventories}
-
-Create Inventory Dictionary
-    [Arguments]    ${inventory}
-    ${has_inventory_id}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${inventory}    inventoryId
-    ${date_available}=    Set Variable    ${inventory}[dateAvailable]
-    IF    ${has_inventory_id}
-         ${inv}=    Create Dictionary    inventoryId=${inventory}[inventoryId]    night=${date_available}
-    ELSE
-         ${inv}=    Create Dictionary    inventoryId=null    night=${date_available}
-    END
-    RETURN    ${inv}
 
 GET Campaign Id
     [Documentation]    Get Campaign Id

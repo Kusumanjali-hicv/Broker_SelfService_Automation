@@ -8,20 +8,29 @@ ${date}
 ${contact_id}   
 
 *** Keywords ***
-Test Broker Cancellation
+Execute Booking And Cancel Flow
     [Documentation]    Executes complete broker cancellation flow
     [Arguments]    ${vendor}   
     GET Access Token   
-    ${status}=    Run Keyword And Return Status    Complete Booking Process    ${vendor}
-    Run Keyword If    ${status}    Cancel Reservation Booking
-    ...    ELSE    Fail    Booking process failed
+    Complete Booking Process    ${vendor}
+    Run Keyword And Continue On Failure    Verify in Salesforce
+    Cancel Reservation
+    
 
 Complete Booking Process
-    [Documentation]    Handles the complete booking flow
+    [Documentation]    Handles the complete booking flow    
     [Arguments]    ${vendor}
-    Check Credit Eligibility    ${vendor}
-    Create Tour Booking
-    Create Reservation
+    ${status1}=    Run Keyword And Return Status    Check Credit Eligibility    ${vendor}
+    Run Keyword If    not ${status1}    Fail    Credit eligibility check failed
+    
+    ${status2}=    Run Keyword And Return Status    Create Tour Booking
+    Run Keyword If    not ${status2}    Fail    Tour booking creation failed
+    
+    ${status3}=    Run Keyword And Return Status    Create Reservation
+    Run Keyword If    not ${status3}    Fail    Reservation creation failed
+    
+    RETURN    True
+
 
 Check Credit Eligibility
     [Documentation]    Verifies credit eligibility and creates contact ID
@@ -37,3 +46,14 @@ Create Tour Booking
 Create Reservation
     [Documentation]    Creates final reservation
     Send Reservation Request
+
+Cancel Reservation
+    [Documentation]    Cancels the reservation booking
+    Cancel Reservation Booking
+    Verify Cancellation in Salesforce
+
+Verify in Salesforce
+    [Documentation]    Verifies the contact ID in Salesforce
+    Veify Contact ID is Created in Salesforce
+    Verify Reservation in Salesforce
+    

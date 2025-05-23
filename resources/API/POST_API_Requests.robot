@@ -113,9 +113,13 @@ Handle Reservation Response
     [Arguments]    ${response}
     IF    '${response.status_code}' == '${ACCEPTED_STATUS_CODE}'
         ${opportunity_id}=    Get From Dictionary    ${response.json()}    opportunityId
+        ${reservationRequestId}=    Get From Dictionary    ${response.json()}    reservationRequestId
+        ${tourRequestId}=    Get From Dictionary    ${response.json()}    tourRequestId
         ${message}=    Get From Dictionary    ${response.json()}    message   
         Should Be Equal As Strings    ${message}    Your Stay has been created.
         Set Suite Variable    ${opportunityId}    ${opportunity_id}
+        Set Suite Variable    ${reservationRequestId}    ${reservationRequestId}
+        Set Suite Variable    ${tourRequestId}    ${tourRequestId}
     ELSE
         Log    *HTML* <font color="red">Reservation Failed with Status Code: ${response.status_code}</font>    level=ERROR
         Log    *HTML* <font color="red">Error Response: ${response.text}</font>    level=ERROR

@@ -3,6 +3,9 @@ Library    String
 Library     DateTime
 Resource    ${EXECDIR}/config/TestData.robot
 
+*** Variables ***
+${length_of_stay}
+${number_of_guests}
 
 *** Keywords ***
 Generate Random UUID
@@ -29,9 +32,9 @@ Generate Phone Number
 
 Set Guests & Length of Stay
     [Documentation]    Set the number of guests and length of stay
-    ${length_of_stay}    Evaluate    random.choice($LENGTH_OF_STAY)    random
+    ${length_of_stay}    Evaluate    random.choice($LENGTH_OF_STAY_Array)    random
     ${length_of_stay}    Convert To Integer    ${length_of_stay}
-    ${number_of_guests}    Evaluate    random.choice($NUMBER_OF_GUESTS)    random
+    ${number_of_guests}    Evaluate    random.choice($NUMBER_OF_GUESTS_Array)    random
     Set Suite Variable    ${length_of_stay}    ${length_of_stay}
     Set Suite Variable    ${number_of_guests}    ${number_of_guests}
 
@@ -46,11 +49,11 @@ Generate Testdata
 
 Set Checkin Checkout Date
     [Documentation]    Set checkin checkout  date
-    ${checkIn_date}=    Get Current Date    result_format=%Y-%m-%d
+    ${date}=    Get Current Date    result_format=%Y-%m-%d
     #add 7days to the current date
-    ${checkIn_date}=    Add Time To Date    ${checkIn_date}    ${length_of_stay} days    result_format=%Y-%m-%d
+    ${checkIn_date}=    Add Time To Date    ${date}    ${length_of_stay} days    result_format=%Y-%m-%d    
+    ${checkOut_date}=    Add Time To Date    ${checkIn_date}    ${length_of_stay} days    result_format=%Y-%m-%d
     
-    ${checkOut_date}=    Add Time To Date    ${checkIn_date}    ${lengthOfStay} days    result_format=%Y-%m-%d
     
     Set Suite Variable    ${checkIn_date}
     Set Suite Variable    ${checkOut_date}
